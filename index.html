@@ -1,0 +1,1101 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>强化学习入门笔记</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: rgba(255, 255, 255, 0.82);
+      --panel-solid: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --line: rgba(20, 27, 45, 0.1);
+      --primary: #3657ff;
+      --primary-strong: #2341d8;
+      --soft: #eef2ff;
+      --success: #147d64;
+      --warning: #9a6700;
+      --danger: #b42318;
+      --shadow: 0 24px 80px rgba(29, 41, 57, 0.12);
+      --radius-lg: 28px;
+      --radius-md: 18px;
+      --radius-sm: 12px;
+    }
+
+    [data-theme="dark"] {
+      --bg: #101522;
+      --panel: rgba(22, 29, 44, 0.8);
+      --panel-solid: #161d2c;
+      --text: #eef2ff;
+      --muted: #9aa4b2;
+      --line: rgba(255, 255, 255, 0.1);
+      --primary: #7c8cff;
+      --primary-strong: #a3adff;
+      --soft: rgba(124, 140, 255, 0.14);
+      --success: #7ee0c4;
+      --warning: #ffd27a;
+      --danger: #ff9c92;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(83, 107, 255, 0.2), transparent 28%),
+        radial-gradient(circle at 90% 0%, rgba(20, 184, 166, 0.16), transparent 28%),
+        linear-gradient(135deg, var(--bg), var(--bg));
+    }
+
+    button, input, textarea, select { font: inherit; }
+    button { border: 0; cursor: pointer; }
+
+    .app {
+      width: min(1440px, calc(100% - 32px));
+      margin: 24px auto;
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 20px;
+    }
+
+    .shell {
+      background: var(--panel);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .sidebar {
+      min-height: calc(100vh - 48px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand {
+      padding: 26px 24px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.2;
+      letter-spacing: -0.04em;
+    }
+
+    .brand p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .toolbar {
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .search {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--panel-solid);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 12px 14px;
+      outline: none;
+    }
+
+    .search:focus, .input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(54, 87, 255, 0.12);
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      padding: 11px 14px;
+      font-weight: 700;
+      color: var(--text);
+      background: var(--panel-solid);
+      border: 1px solid var(--line);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(54, 87, 255, 0.35);
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 12px 32px rgba(54, 87, 255, 0.26);
+    }
+
+    .btn.danger { color: var(--danger); }
+    .btn.small { padding: 8px 10px; border-radius: 11px; font-size: 13px; }
+    .btn.full { width: 100%; }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .select, .input {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--panel-solid);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 11px 12px;
+      outline: none;
+    }
+
+    .note-list {
+      padding: 12px;
+      overflow: auto;
+      flex: 1;
+    }
+
+    .note-card {
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      color: var(--text);
+      border: 1px solid transparent;
+      border-radius: 18px;
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .note-card:hover { background: var(--soft); }
+
+    .note-card.active {
+      background: var(--panel-solid);
+      border-color: rgba(54, 87, 255, 0.32);
+      box-shadow: 0 16px 40px rgba(54, 87, 255, 0.08);
+    }
+
+    .note-card h3 {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.35;
+      letter-spacing: -0.01em;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--primary-strong);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .empty {
+      padding: 28px 14px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .main {
+      min-height: calc(100vh - 48px);
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+    }
+
+    .hero {
+      padding: 28px 30px 22px;
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      gap: 22px;
+    }
+
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .hero h2 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 46px);
+      line-height: 1.05;
+      letter-spacing: -0.06em;
+    }
+
+    .hero p {
+      max-width: 760px;
+      margin: 12px 0 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      background: var(--panel-solid);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 28px;
+      letter-spacing: -0.04em;
+    }
+
+    .stat span { color: var(--muted); font-size: 13px; }
+
+    .form {
+      padding: 18px 30px;
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: 1.3fr 0.7fr 0.7fr 0.7fr;
+      gap: 12px;
+    }
+
+    .field { display: grid; gap: 7px; }
+    .field label { color: var(--muted); font-size: 12px; font-weight: 800; }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 0;
+      min-height: 0;
+    }
+
+    .pane {
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .pane:first-child { border-right: 1px solid var(--line); }
+
+    .pane-head {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .pane-head strong { font-size: 14px; }
+    .hint, .status { color: var(--muted); font-size: 13px; }
+
+    textarea {
+      width: 100%;
+      height: 100%;
+      resize: none;
+      border: 0;
+      outline: none;
+      padding: 20px;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.36);
+      line-height: 1.75;
+      font-size: 15px;
+    }
+
+    [data-theme="dark"] textarea { background: rgba(0, 0, 0, 0.08); }
+
+    .preview {
+      overflow: auto;
+      padding: 20px 24px 40px;
+      background: rgba(255, 255, 255, 0.22);
+      line-height: 1.75;
+    }
+
+    [data-theme="dark"] .preview { background: rgba(0, 0, 0, 0.06); }
+
+    .preview h1, .preview h2, .preview h3 { letter-spacing: -0.03em; line-height: 1.25; }
+    .preview h1 { font-size: 28px; margin: 0 0 16px; }
+    .preview h2 { font-size: 22px; margin: 24px 0 12px; }
+    .preview h3 { font-size: 18px; margin: 20px 0 10px; }
+    .preview p { margin: 10px 0; }
+    .preview ul, .preview ol { padding-left: 22px; }
+
+    .preview code {
+      background: var(--soft);
+      color: var(--primary-strong);
+      padding: 2px 6px;
+      border-radius: 8px;
+      font-size: 0.92em;
+    }
+
+    .preview pre {
+      overflow: auto;
+      background: #111827;
+      color: #eef2ff;
+      padding: 16px;
+      border-radius: 16px;
+      line-height: 1.6;
+    }
+
+    .preview pre code { background: transparent; color: inherit; padding: 0; }
+
+    .preview blockquote {
+      margin: 14px 0;
+      padding: 12px 16px;
+      border-left: 4px solid var(--primary);
+      background: var(--soft);
+      border-radius: 0 14px 14px 0;
+      color: var(--muted);
+    }
+
+    .preview table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      overflow: hidden;
+      border-radius: 14px;
+    }
+
+    .preview th, .preview td {
+      border: 1px solid var(--line);
+      padding: 10px;
+      text-align: left;
+    }
+
+    .mobile-tabs { display: none; padding: 10px 12px; border-bottom: 1px solid var(--line); gap: 8px; }
+    .file-input { display: none; }
+
+    @media (max-width: 1100px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { min-height: auto; }
+      .note-list { max-height: 360px; }
+    }
+
+    @media (max-width: 760px) {
+      .app { width: min(100% - 20px, 1440px); margin: 10px auto; }
+      .hero, .form { padding-left: 16px; padding-right: 16px; }
+      .hero-top { display: grid; }
+      .hero-actions { justify-content: flex-start; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .form { grid-template-columns: 1fr; }
+      .workspace { grid-template-columns: 1fr; }
+      .pane:first-child { border-right: 0; }
+      .pane { display: none; min-height: 520px; }
+      .pane.active { display: grid; }
+      .mobile-tabs { display: flex; }
+      .btn.mobile-active { background: var(--soft); color: var(--primary-strong); border-color: rgba(54, 87, 255, 0.24); }
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <div class="app">
+    <aside class="shell sidebar">
+      <div class="brand">
+        <h1>强化学习入门笔记</h1>
+        <p>用一个清爽的页面记录概念、公式、代码和学习心得。数据保存在当前浏览器本地，建议定期导出备份。</p>
+      </div>
+
+      <div class="toolbar">
+        <input id="searchInput" class="search" type="search" placeholder="搜索标题、标签、正文" />
+        <div class="filters">
+          <select id="moduleFilter" class="select"></select>
+          <select id="masteryFilter" class="select">
+            <option value="all">全部掌握度</option>
+            <option value="未开始">未开始</option>
+            <option value="初步理解">初步理解</option>
+            <option value="基本掌握">基本掌握</option>
+            <option value="需要复习">需要复习</option>
+          </select>
+        </div>
+        <button id="newNoteBtn" class="btn primary full">新建笔记</button>
+      </div>
+
+      <div id="noteList" class="note-list"></div>
+    </aside>
+
+    <main class="shell main">
+      <section class="hero">
+        <div class="hero-top">
+          <div>
+            <h2>把强化学习学清楚，而不是只收藏资料。</h2>
+            <p>建议每篇笔记只解决一个问题：这个概念是什么、为什么需要它、公式怎么理解、能不能用一个例子讲清楚。</p>
+          </div>
+          <div class="hero-actions">
+            <button id="themeBtn" class="btn">切换深浅色</button>
+            <button id="exportBtn" class="btn">导出备份</button>
+            <button id="importBtn" class="btn">导入备份</button>
+            <input id="importFile" class="file-input" type="file" accept="application/json" />
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <strong id="statTotal">0</strong>
+            <span>总笔记</span>
+          </div>
+          <div class="stat">
+            <strong id="statMastered">0</strong>
+            <span>基本掌握</span>
+          </div>
+          <div class="stat">
+            <strong id="statReview">0</strong>
+            <span>需要复习</span>
+          </div>
+          <div class="stat">
+            <strong id="statModules">0</strong>
+            <span>学习模块</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="form">
+        <div class="field">
+          <label for="titleInput">标题</label>
+          <input id="titleInput" class="input" placeholder="例如：什么是马尔可夫决策过程 MDP" />
+        </div>
+        <div class="field">
+          <label for="moduleInput">模块</label>
+          <input id="moduleInput" class="input" placeholder="例如：基础概念" />
+        </div>
+        <div class="field">
+          <label for="masteryInput">掌握度</label>
+          <select id="masteryInput" class="input">
+            <option>未开始</option>
+            <option>初步理解</option>
+            <option>基本掌握</option>
+            <option>需要复习</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="tagsInput">标签</label>
+          <input id="tagsInput" class="input" placeholder="用逗号分隔" />
+        </div>
+      </section>
+
+      <div class="mobile-tabs">
+        <button id="editTab" class="btn small mobile-active">编辑</button>
+        <button id="previewTab" class="btn small">预览</button>
+      </div>
+
+      <section class="workspace">
+        <div id="editorPane" class="pane active">
+          <div class="pane-head">
+            <strong>Markdown 编辑区</strong>
+            <div class="row">
+              <span id="saveStatus" class="status">已保存</span>
+              <button id="saveBtn" class="btn small primary">保存</button>
+              <button id="deleteBtn" class="btn small danger">删除</button>
+            </div>
+          </div>
+          <textarea id="contentInput" spellcheck="false" placeholder="在这里写笔记。支持 Markdown，例如：# 标题、- 列表、**加粗**、`代码`。"></textarea>
+        </div>
+
+        <div id="previewPane" class="pane active">
+          <div class="pane-head">
+            <strong>实时预览</strong>
+            <span class="hint">写完后建议导出 JSON 备份</span>
+          </div>
+          <article id="preview" class="preview"></article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "rl_notes_site_v3";
+
+    const starterNotes = [
+      {
+        id: crypto.randomUUID(),
+        title: "学习入口：强化学习到底在学什么",
+        module: "基础概念",
+        mastery: "初步理解",
+        tags: ["RL", "入门", "框架"],
+        updatedAt: new Date().toISOString(),
+        content: `# 强化学习到底在学什么
+
+强化学习研究的是：一个智能体如何通过和环境不断互动，学会做出更好的决策。
+
+## 最核心的四个词
+
+- **Agent**：做决策的人或模型。
+- **Environment**：智能体所在的环境。
+- **Action**：智能体做出的动作。
+- **Reward**：环境给智能体的反馈。
+
+## 一句话理解
+
+机器学习更像是“看答案学规律”，强化学习更像是“不断尝试，通过奖励学策略”。
+
+## 我需要重点搞懂的问题
+
+1. 状态和观测有什么区别？
+2. 策略到底是什么？
+3. 价值函数为什么重要？
+4. 为什么强化学习很容易训练不稳定？`
+      },
+      {
+        id: crypto.randomUUID(),
+        title: "MDP：把强化学习问题写成数学模型",
+        module: "Part 1 Key Concepts",
+        mastery: "需要复习",
+        tags: ["MDP", "状态", "奖励"],
+        updatedAt: new Date().toISOString(),
+        content: `# MDP：马尔可夫决策过程
+
+MDP 是强化学习最基本的问题建模方式。
+
+## 五个组成部分
+
+| 符号 | 含义 |
+| --- | --- |
+| S | 状态集合 |
+| A | 动作集合 |
+| P | 状态转移概率 |
+| R | 奖励函数 |
+| γ | 折扣因子 |
+
+## 直观理解
+
+当前状态已经包含了做决策所需的主要信息，所以不用完整记住过去发生的一切。
+
+这就是“马尔可夫性”。
+
+## 我的理解
+
+MDP 的作用不是让问题变复杂，而是把“智能体如何试错学习”这件事规范地描述出来。`
+      },
+      {
+        id: crypto.randomUUID(),
+        title: "笔记模板：论文或教程怎么整理",
+        module: "学习方法",
+        mastery: "基本掌握",
+        tags: ["模板", "总结"],
+        updatedAt: new Date().toISOString(),
+        content: `# 笔记模板
+
+## 这篇内容解决什么问题？
+
+写 2 到 3 句话，说明它要解决的核心问题。
+
+## 遇到的难点是什么？
+
+- 难点 1：
+- 难点 2：
+
+## 使用了什么方法？
+
+用自己的话解释方法，不要只复制公式。
+
+## 最终效果是什么？
+
+记录实验结果、优点和局限。
+
+## 我现在还没懂的地方
+
+- 问题 1：
+- 问题 2：`
+      }
+    ];
+
+    let state = loadState();
+    let activeId = state.activeId || state.notes[0]?.id || null;
+    let saveTimer = null;
+    let mobileMode = "edit";
+
+    const els = {
+      searchInput: document.getElementById("searchInput"),
+      moduleFilter: document.getElementById("moduleFilter"),
+      masteryFilter: document.getElementById("masteryFilter"),
+      noteList: document.getElementById("noteList"),
+      newNoteBtn: document.getElementById("newNoteBtn"),
+      titleInput: document.getElementById("titleInput"),
+      moduleInput: document.getElementById("moduleInput"),
+      masteryInput: document.getElementById("masteryInput"),
+      tagsInput: document.getElementById("tagsInput"),
+      contentInput: document.getElementById("contentInput"),
+      preview: document.getElementById("preview"),
+      saveBtn: document.getElementById("saveBtn"),
+      deleteBtn: document.getElementById("deleteBtn"),
+      saveStatus: document.getElementById("saveStatus"),
+      exportBtn: document.getElementById("exportBtn"),
+      importBtn: document.getElementById("importBtn"),
+      importFile: document.getElementById("importFile"),
+      themeBtn: document.getElementById("themeBtn"),
+      statTotal: document.getElementById("statTotal"),
+      statMastered: document.getElementById("statMastered"),
+      statReview: document.getElementById("statReview"),
+      statModules: document.getElementById("statModules"),
+      editTab: document.getElementById("editTab"),
+      previewTab: document.getElementById("previewTab"),
+      editorPane: document.getElementById("editorPane"),
+      previewPane: document.getElementById("previewPane")
+    };
+
+    init();
+
+    function loadState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) {
+        return { notes: starterNotes, activeId: starterNotes[0].id, theme: "light" };
+      }
+
+      try {
+        const parsed = JSON.parse(saved);
+        if (!Array.isArray(parsed.notes)) throw new Error("bad notes");
+        return {
+          notes: parsed.notes,
+          activeId: parsed.activeId || parsed.notes[0]?.id || null,
+          theme: parsed.theme || "light"
+        };
+      } catch {
+        return { notes: starterNotes, activeId: starterNotes[0].id, theme: "light" };
+      }
+    }
+
+    function persist() {
+      state.activeId = activeId;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      els.saveStatus.textContent = "已保存";
+    }
+
+    function init() {
+      document.body.dataset.theme = state.theme || "light";
+      bindEvents();
+      renderAll();
+    }
+
+    function bindEvents() {
+      els.searchInput.addEventListener("input", renderList);
+      els.moduleFilter.addEventListener("change", renderList);
+      els.masteryFilter.addEventListener("change", renderList);
+      els.newNoteBtn.addEventListener("click", createNote);
+      els.saveBtn.addEventListener("click", () => {
+        syncEditorToState();
+        persist();
+        renderAll();
+      });
+      els.deleteBtn.addEventListener("click", deleteActiveNote);
+
+      [els.titleInput, els.moduleInput, els.masteryInput, els.tagsInput, els.contentInput].forEach(el => {
+        el.addEventListener("input", () => {
+          els.saveStatus.textContent = "编辑中";
+          syncEditorToState();
+          renderPreview();
+          window.clearTimeout(saveTimer);
+          saveTimer = window.setTimeout(() => {
+            persist();
+            renderList();
+            renderStats();
+            renderModuleFilter();
+          }, 600);
+        });
+      });
+
+      els.exportBtn.addEventListener("click", exportNotes);
+      els.importBtn.addEventListener("click", () => els.importFile.click());
+      els.importFile.addEventListener("change", importNotes);
+      els.themeBtn.addEventListener("click", toggleTheme);
+      els.editTab.addEventListener("click", () => setMobileMode("edit"));
+      els.previewTab.addEventListener("click", () => setMobileMode("preview"));
+    }
+
+    function getActiveNote() {
+      return state.notes.find(note => note.id === activeId) || null;
+    }
+
+    function renderAll() {
+      renderModuleFilter();
+      renderList();
+      renderEditor();
+      renderPreview();
+      renderStats();
+    }
+
+    function renderModuleFilter() {
+      const current = els.moduleFilter.value || "all";
+      const modules = unique(state.notes.map(note => note.module || "未分类"));
+      els.moduleFilter.innerHTML = `<option value="all">全部模块</option>` + modules
+        .map(module => `<option value="${escapeAttr(module)}">${escapeHTML(module)}</option>`)
+        .join("");
+      els.moduleFilter.value = modules.includes(current) ? current : "all";
+    }
+
+    function renderList() {
+      const query = els.searchInput.value.trim().toLowerCase();
+      const moduleFilter = els.moduleFilter.value;
+      const masteryFilter = els.masteryFilter.value;
+
+      const filtered = state.notes
+        .slice()
+        .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+        .filter(note => {
+          const haystack = [note.title, note.module, note.mastery, note.tags?.join(" "), note.content].join(" ").toLowerCase();
+          const matchQuery = !query || haystack.includes(query);
+          const matchModule = moduleFilter === "all" || (note.module || "未分类") === moduleFilter;
+          const matchMastery = masteryFilter === "all" || note.mastery === masteryFilter;
+          return matchQuery && matchModule && matchMastery;
+        });
+
+      if (!filtered.length) {
+        els.noteList.innerHTML = `<div class="empty">没有找到笔记。可以清空搜索条件，或者新建一篇。</div>`;
+        return;
+      }
+
+      els.noteList.innerHTML = filtered.map(note => {
+        const tags = (note.tags || []).slice(0, 3).map(tag => `<span class="pill">${escapeHTML(tag)}</span>`).join("");
+        const date = formatDate(note.updatedAt);
+        return `
+          <button class="note-card ${note.id === activeId ? "active" : ""}" data-id="${note.id}">
+            <h3>${escapeHTML(note.title || "未命名笔记")}</h3>
+            <div class="meta">
+              <span>${escapeHTML(note.module || "未分类")}</span>
+              <span>·</span>
+              <span>${escapeHTML(note.mastery || "未开始")}</span>
+              <span>·</span>
+              <span>${date}</span>
+            </div>
+            <div class="meta">${tags}</div>
+          </button>
+        `;
+      }).join("");
+
+      document.querySelectorAll(".note-card").forEach(card => {
+        card.addEventListener("click", () => {
+          syncEditorToState();
+          activeId = card.dataset.id;
+          persist();
+          renderAll();
+        });
+      });
+    }
+
+    function renderEditor() {
+      const note = getActiveNote();
+      if (!note) {
+        els.titleInput.value = "";
+        els.moduleInput.value = "";
+        els.masteryInput.value = "未开始";
+        els.tagsInput.value = "";
+        els.contentInput.value = "";
+        return;
+      }
+
+      els.titleInput.value = note.title || "";
+      els.moduleInput.value = note.module || "";
+      els.masteryInput.value = note.mastery || "未开始";
+      els.tagsInput.value = (note.tags || []).join(", ");
+      els.contentInput.value = note.content || "";
+      els.saveStatus.textContent = "已保存";
+    }
+
+    function renderPreview() {
+      const title = els.titleInput.value.trim() || "未命名笔记";
+      const module = els.moduleInput.value.trim() || "未分类";
+      const mastery = els.masteryInput.value;
+      const tags = splitTags(els.tagsInput.value);
+      const content = els.contentInput.value.trim();
+
+      const header = `
+        <h1>${escapeHTML(title)}</h1>
+        <p>
+          <span class="pill">${escapeHTML(module)}</span>
+          <span class="pill">${escapeHTML(mastery)}</span>
+          ${tags.map(tag => `<span class="pill">${escapeHTML(tag)}</span>`).join(" ")}
+        </p>
+      `;
+
+      els.preview.innerHTML = header + markdownToHTML(content || "还没有正文内容。");
+    }
+
+    function renderStats() {
+      const total = state.notes.length;
+      const mastered = state.notes.filter(note => note.mastery === "基本掌握").length;
+      const review = state.notes.filter(note => note.mastery === "需要复习").length;
+      const modules = unique(state.notes.map(note => note.module || "未分类")).length;
+      els.statTotal.textContent = total;
+      els.statMastered.textContent = mastered;
+      els.statReview.textContent = review;
+      els.statModules.textContent = modules;
+    }
+
+    function syncEditorToState() {
+      const note = getActiveNote();
+      if (!note) return;
+      note.title = els.titleInput.value.trim() || "未命名笔记";
+      note.module = els.moduleInput.value.trim() || "未分类";
+      note.mastery = els.masteryInput.value;
+      note.tags = splitTags(els.tagsInput.value);
+      note.content = els.contentInput.value;
+      note.updatedAt = new Date().toISOString();
+    }
+
+    function createNote() {
+      syncEditorToState();
+      const note = {
+        id: crypto.randomUUID(),
+        title: "新的强化学习笔记",
+        module: "基础概念",
+        mastery: "未开始",
+        tags: [],
+        updatedAt: new Date().toISOString(),
+        content: `# 新的强化学习笔记
+
+## 这个概念是什么？
+
+
+## 为什么需要它？
+
+
+## 一个简单例子
+
+
+## 我还没懂的问题
+
+- `
+      };
+      state.notes.unshift(note);
+      activeId = note.id;
+      persist();
+      renderAll();
+      els.titleInput.focus();
+      els.titleInput.select();
+    }
+
+    function deleteActiveNote() {
+      const note = getActiveNote();
+      if (!note) return;
+      const ok = confirm(`确定删除《${note.title || "未命名笔记"}》吗？`);
+      if (!ok) return;
+      state.notes = state.notes.filter(item => item.id !== note.id);
+      activeId = state.notes[0]?.id || null;
+      persist();
+      if (!state.notes.length) createNote();
+      renderAll();
+    }
+
+    function exportNotes() {
+      syncEditorToState();
+      persist();
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const date = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `rl-notes-backup-${date}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importNotes(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const imported = JSON.parse(reader.result);
+          if (!Array.isArray(imported.notes)) throw new Error("bad data");
+          const ok = confirm("导入会覆盖当前浏览器里的笔记。确定继续吗？");
+          if (!ok) return;
+          state = {
+            notes: imported.notes,
+            activeId: imported.activeId || imported.notes[0]?.id || null,
+            theme: imported.theme || state.theme || "light"
+          };
+          activeId = state.activeId;
+          persist();
+          renderAll();
+        } catch {
+          alert("导入失败：请选择之前导出的 JSON 备份文件。");
+        } finally {
+          event.target.value = "";
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function toggleTheme() {
+      state.theme = document.body.dataset.theme === "dark" ? "light" : "dark";
+      document.body.dataset.theme = state.theme;
+      persist();
+    }
+
+    function setMobileMode(mode) {
+      mobileMode = mode;
+      els.editorPane.classList.toggle("active", mobileMode === "edit");
+      els.previewPane.classList.toggle("active", mobileMode === "preview");
+      els.editTab.classList.toggle("mobile-active", mobileMode === "edit");
+      els.previewTab.classList.toggle("mobile-active", mobileMode === "preview");
+    }
+
+    function splitTags(value) {
+      return value.split(/[,，]/).map(tag => tag.trim()).filter(Boolean);
+    }
+
+    function unique(items) {
+      return [...new Set(items.filter(Boolean))];
+    }
+
+    function formatDate(value) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "";
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    }
+
+    function escapeHTML(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function escapeAttr(text) {
+      return escapeHTML(text).replaceAll("`", "&#096;");
+    }
+
+    function markdownToHTML(markdown) {
+      const lines = escapeHTML(markdown).split("\n");
+      let html = "";
+      let inCode = false;
+      let inList = false;
+      let inTable = false;
+      let tableRows = [];
+
+      function closeList() {
+        if (inList) {
+          html += "</ul>";
+          inList = false;
+        }
+      }
+
+      function closeTable() {
+        if (!inTable) return;
+        if (tableRows.length) {
+          html += "<table>";
+          tableRows.forEach((row, index) => {
+            if (index === 1 && row.every(cell => /^-+$/.test(cell.replace(/\s/g, "")))) return;
+            const tag = index === 0 ? "th" : "td";
+            html += "<tr>" + row.map(cell => `<${tag}>${inlineMarkdown(cell.trim())}</${tag}>`).join("") + "</tr>";
+          });
+          html += "</table>";
+        }
+        inTable = false;
+        tableRows = [];
+      }
+
+      for (const line of lines) {
+        if (line.trim().startsWith("```")) {
+          closeList();
+          closeTable();
+          if (!inCode) {
+            inCode = true;
+            html += "<pre><code>";
+          } else {
+            inCode = false;
+            html += "</code></pre>";
+          }
+          continue;
+        }
+
+        if (inCode) {
+          html += line + "\n";
+          continue;
+        }
+
+        if (/^\s*\|.*\|\s*$/.test(line)) {
+          closeList();
+          inTable = true;
+          tableRows.push(line.trim().slice(1, -1).split("|"));
+          continue;
+        } else {
+          closeTable();
+        }
+
+        if (!line.trim()) {
+          closeList();
+          continue;
+        }
+
+        if (line.startsWith("### ")) {
+          closeList();
+          html += `<h3>${inlineMarkdown(line.slice(4))}</h3>`;
+        } else if (line.startsWith("## ")) {
+          closeList();
+          html += `<h2>${inlineMarkdown(line.slice(3))}</h2>`;
+        } else if (line.startsWith("# ")) {
+          closeList();
+          html += `<h1>${inlineMarkdown(line.slice(2))}</h1>`;
+        } else if (line.startsWith("&gt; ")) {
+          closeList();
+          html += `<blockquote>${inlineMarkdown(line.slice(5))}</blockquote>`;
+        } else if (/^[-*]\s+/.test(line)) {
+          if (!inList) {
+            html += "<ul>";
+            inList = true;
+          }
+          html += `<li>${inlineMarkdown(line.replace(/^[-*]\s+/, ""))}</li>`;
+        } else {
+          closeList();
+          html += `<p>${inlineMarkdown(line)}</p>`;
+        }
+      }
+
+      closeList();
+      closeTable();
+      if (inCode) html += "</code></pre>";
+      return html;
+    }
+
+    function inlineMarkdown(text) {
+      return text
+        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+        .replace(/`([^`]+)`/g, "<code>$1</code>");
+    }
+  </script>
+</body>
+</html>
