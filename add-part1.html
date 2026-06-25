@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>正在整理 Part 1 笔记</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      background: linear-gradient(135deg, #eef2ff, #ecfeff);
+      color: #172033;
+    }
+    .card {
+      width: min(520px, calc(100% - 32px));
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid rgba(20, 27, 45, 0.1);
+      border-radius: 28px;
+      box-shadow: 0 24px 80px rgba(29, 41, 57, 0.12);
+      padding: 32px;
+      text-align: center;
+    }
+    h1 { margin: 0; font-size: 28px; letter-spacing: -0.04em; }
+    p { color: #667085; line-height: 1.7; }
+    a {
+      display: inline-flex;
+      margin-top: 8px;
+      padding: 12px 16px;
+      border-radius: 14px;
+      background: #3657ff;
+      color: white;
+      text-decoration: none;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Part 1 笔记已整理</h1>
+    <p>正在把你的 Part 1 学习笔记写入当前浏览器的网站数据中。不会覆盖你已有的其他笔记。</p>
+    <a href="./">立即回到笔记网站</a>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "rl_notes_site_v3";
+    const now = new Date().toISOString();
+    const note = {
+      id: "part1-key-concepts-rl-notes",
+      title: "Part 1：Key Concepts in RL 学习笔记",
+      module: "Part 1 Key Concepts",
+      mastery: "基本掌握",
+      tags: ["RL", "MDP", "Policy", "Value", "Bellman"],
+      updatedAt: now,
+      content: `# Part 1：Key Concepts in RL 学习笔记
+
+## 1. 强化学习的一句话理解
+
+**强化学习 = 智能体通过试错学习决策策略。**
+
+它关注的不是“给定输入直接预测答案”，而是：智能体在环境中不断尝试动作，根据奖励反馈逐步学会更好的决策方式。
+
+## 2. 强化学习的基本闭环
+
+强化学习可以理解成一个不断循环的过程：
+
+1. **Agent** 观察当前的 **observation / state**。
+2. Agent 根据当前 **policy** 选择一个 **action**。
+3. **Environment** 接收动作后发生变化。
+4. Environment 返回 **reward** 和 **next observation**。
+5. Agent 根据反馈更新自己的 **policy**。
+6. 最终目标是最大化长期累计奖励，也就是 **return**。
+
+用一句话概括：
+
+> Agent 观察环境 → 做动作 → 环境反馈奖励和新状态 → Agent 调整策略 → 尽可能获得更高的长期回报。
+
+## 3. 核心概念整理
+
+| 概念 | 我的理解 |
+| --- | --- |
+| **State** | 环境的真实完整状态，包含决策所需的全部信息。 |
+| **Observation** | 智能体实际看到的信息，可能只是 State 的一部分。 |
+| **Action** | 智能体能够采取的具体动作。 |
+| **Action Space** | 所有合法动作组成的集合。 |
+| **Policy** | 从状态到动作的规则，相当于控制系统里的“控制律”。 |
+| **Trajectory** | 一整段状态—动作—奖励序列，可以理解为一次完整经历。 |
+| **Reward** | 当前一步动作带来的即时奖励。 |
+| **Return** | 从当前开始往后累计得到的总奖励。 |
+
+## 4. 价值函数相关概念
+
+| 概念 | 我的理解 |
+| --- | --- |
+| **V(s)** | 状态 \`s\` 有多好：从这个状态出发，未来大概能拿到多少回报。 |
+| **Q(s, a)** | 在状态 \`s\` 下做动作 \`a\` 有多好。 |
+| **Q*(s, a)** | 最优情况下，在状态 \`s\` 下做动作 \`a\` 有多好。 |
+| **最优动作** | 选择让 \`Q*(s, a)\` 最大的动作。 |
+| **Bellman 方程** | 当前价值 = 当前奖励 + 折扣后的未来价值。 |
+| **Advantage** | 某个动作比该状态下的平均动作好多少。 |
+
+## 5. Bellman 思想的直观理解
+
+Bellman 的核心不是复杂公式，而是一种“拆问题”的思想：
+
+> 一个状态现在有多好，取决于当前这一步能拿多少奖励，以及走到下一个状态后未来还能有多好。
+
+也就是：
+
+\`当前价值 = 当前奖励 + 未来价值\`
+
+其中未来价值通常会乘上折扣因子 \`γ\`，表示越远的奖励影响越小。
+
+## 6. MDP：强化学习环境的数学描述
+
+MDP 可以用下面几个部分描述强化学习环境：
+
+| 符号 | 含义 |
+| --- | --- |
+| **S** | 状态集合 |
+| **A** | 动作集合 |
+| **R** | 奖励函数 |
+| **P** | 状态转移概率 |
+| **ρ₀** | 初始状态分布 |
+
+MDP 的核心思想是：
+
+> 下一状态只和当前状态、当前动作有关，而不需要依赖更早之前的完整历史。
+
+这就是所谓的**马尔可夫性**。
+
+## 7. 我目前的阶段性理解
+
+Part 1 的重点不是立刻掌握复杂算法，而是先建立强化学习的基本语言体系：
+
+- 强化学习的目标是最大化长期累计奖励。
+- Policy 决定 Agent 如何选择动作。
+- Value / Q-value 用来评价状态或动作的好坏。
+- Bellman 方程把“长期价值”拆成“当前奖励 + 未来价值”。
+- MDP 是描述强化学习问题的标准数学框架。
+
+## 8. 后续需要继续搞懂的问题
+
+- State 和 Observation 在实际机器人任务中怎么区分？
+- Policy 和传统控制里的控制律有哪些相似和不同？
+- V(s)、Q(s,a)、Advantage 在不同算法里分别怎么用？
+- Bellman 方程为什么能支撑价值迭代和 Q-learning？
+- MDP 假设在真实复杂环境中是否总是成立？`
+    };
+
+    function loadState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return { notes: [], activeId: null, theme: "light" };
+      try {
+        const parsed = JSON.parse(saved);
+        return Array.isArray(parsed.notes) ? parsed : { notes: [], activeId: null, theme: "light" };
+      } catch {
+        return { notes: [], activeId: null, theme: "light" };
+      }
+    }
+
+    const state = loadState();
+    const index = state.notes.findIndex(item => item.id === note.id || item.title === note.title);
+    if (index >= 0) {
+      state.notes[index] = { ...state.notes[index], ...note };
+    } else {
+      state.notes.unshift(note);
+    }
+    state.activeId = note.id;
+    state.theme = state.theme || "light";
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+
+    setTimeout(() => {
+      window.location.href = "./";
+    }, 900);
+  </script>
+</body>
+</html>
