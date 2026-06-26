@@ -16,15 +16,20 @@ permalink: /
         <div class="logo">RL</div>
         <div>
           <h1>强化学习入门笔记</h1>
-          <p>当前只保留 Part 1 学习笔记。</p>
+          <p>当前包含 Part 1 和 Part 2 学习笔记。</p>
         </div>
       </div>
       <div class="note-list">
-        <button class="note-card">
+        <a class="note-card" href="#part1">
           <h3>Part 1：Key Concepts in RL 学习笔记</h3>
           <div class="meta"><span>Part 1 Key Concepts</span><span>·</span><span>基本掌握</span></div>
           <div class="meta"><span class="pill">RL</span><span class="pill">MDP</span><span class="pill">Policy</span><span class="pill">Value</span><span class="pill">Bellman</span></div>
-        </button>
+        </a>
+        <a class="note-card" href="#part2">
+          <h3>Part 2：Kinds of RL Algorithms 学习笔记</h3>
+          <div class="meta"><span>Part 2 Algorithms</span><span>·</span><span>初步理解</span></div>
+          <div class="meta"><span class="pill">Model-Free</span><span class="pill">PPO</span><span class="pill">DQN</span><span class="pill">SAC</span><span class="pill">TD3</span></div>
+        </a>
       </div>
     </aside>
 
@@ -32,11 +37,11 @@ permalink: /
       <header class="hero">
         <div>
           <h2>入门强化学习</h2>
-          <p>先把 Agent、Environment、Policy、Reward、Return、Value Function、Bellman 和 MDP 这条主线学清楚。</p>
+          <p>先把核心概念和算法分类学清楚：Part 1 建立强化学习语言体系，Part 2 理解不同算法路线。</p>
         </div>
       </header>
 
-      <article class="preview single-note">
+      <article id="part1" class="preview single-note">
         <h1>Part 1：Key Concepts in RL 学习笔记</h1>
         <p><span class="pill">Part 1 Key Concepts</span> <span class="pill">基本掌握</span> <span class="pill">RL</span> <span class="pill">MDP</span> <span class="pill">Policy</span> <span class="pill">Value</span> <span class="pill">Bellman</span></p>
 
@@ -45,7 +50,6 @@ permalink: /
         <p>它关注的不是“给定输入直接预测答案”，而是：智能体在环境中不断尝试动作，根据奖励反馈逐步学会更好的决策方式。</p>
 
         <h2>2. 强化学习的基本闭环</h2>
-        <p>强化学习可以理解成一个不断循环的过程：</p>
         <ul>
           <li><strong>Agent</strong> 观察当前的 <strong>observation / state</strong>。</li>
           <li>Agent 根据当前 <strong>policy</strong> 选择一个 <strong>action</strong>。</li>
@@ -80,42 +84,57 @@ permalink: /
           <tr><td><strong>Advantage</strong></td><td>某个动作比该状态下的平均动作好多少。</td></tr>
         </table>
 
-        <h2>5. Bellman 思想的直观理解</h2>
-        <p>Bellman 的核心不是复杂公式，而是一种“拆问题”的思想：</p>
-        <blockquote>一个状态现在有多好，取决于当前这一步能拿多少奖励，以及走到下一个状态后未来还能有多好。</blockquote>
-        <p>也就是：<strong>当前价值 = 当前奖励 + 未来价值</strong>。</p>
-        <p>其中未来价值通常会乘上折扣因子 <strong>γ</strong>，表示越远的奖励影响越小。</p>
-
-        <h2>6. MDP：强化学习环境的数学描述</h2>
-        <p>MDP 可以用下面几个部分描述强化学习环境：</p>
-        <table>
-          <tr><th>符号</th><th>含义</th></tr>
-          <tr><td><strong>S</strong></td><td>状态集合</td></tr>
-          <tr><td><strong>A</strong></td><td>动作集合</td></tr>
-          <tr><td><strong>R</strong></td><td>奖励函数</td></tr>
-          <tr><td><strong>P</strong></td><td>状态转移概率</td></tr>
-          <tr><td><strong>ρ₀</strong></td><td>初始状态分布</td></tr>
-        </table>
+        <h2>5. MDP</h2>
+        <p>MDP 可以用 <strong>S, A, R, P, ρ₀</strong> 描述强化学习环境。</p>
         <blockquote>下一状态只和当前状态、当前动作有关，而不需要依赖更早之前的完整历史。</blockquote>
         <p>这就是所谓的<strong>马尔可夫性</strong>。</p>
+      </article>
 
-        <h2>7. 我目前的阶段性理解</h2>
+      <article id="part2" class="preview single-note">
+        <h1>Part 2：Kinds of RL Algorithms 学习笔记</h1>
+        <p><span class="pill">Part 2 Algorithms</span> <span class="pill">初步理解</span> <span class="pill">Model-Free</span> <span class="pill">Model-Based</span> <span class="pill">PPO</span> <span class="pill">DQN</span> <span class="pill">SAC</span></p>
+
+        <h2>1. 强化学习算法分类主要看三个问题</h2>
+        <p>理解强化学习算法分类时，不要一上来死记算法名字，而是先看三个问题：</p>
         <ul>
-          <li>强化学习的目标是最大化长期累计奖励。</li>
-          <li>Policy 决定 Agent 如何选择动作。</li>
-          <li>Value / Q-value 用来评价状态或动作的好坏。</li>
-          <li>Bellman 方程把“长期价值”拆成“当前奖励 + 未来价值”。</li>
-          <li>MDP 是描述强化学习问题的标准数学框架。</li>
+          <li>有没有环境模型？</li>
+          <li>Model-Free 里到底学什么？</li>
+          <li>数据怎么用？</li>
         </ul>
 
-        <h2>8. 后续需要继续搞懂的问题</h2>
+        <h2>2. 有没有环境模型？</h2>
+        <table>
+          <tr><th>类别</th><th>核心思想</th></tr>
+          <tr><td><strong>Model-Free</strong></td><td>不显式建模环境，直接通过交互学习策略或价值函数。</td></tr>
+          <tr><td><strong>Model-Based</strong></td><td>使用或学习环境模型，然后基于模型进行规划，或者用模型辅助学习。</td></tr>
+        </table>
+        <p>直观理解：Model-Free 更像是“直接练”；Model-Based 更像是“先学会环境怎么变化，再利用模型预测和规划”。</p>
+
+        <h2>3. Model-Free 里到底学什么？</h2>
+        <table>
+          <tr><th>路线</th><th>学什么</th><th>代表算法</th></tr>
+          <tr><td><strong>Policy Optimization</strong></td><td>直接学习策略 π(a|s)</td><td>PPO</td></tr>
+          <tr><td><strong>Q-Learning</strong></td><td>学习动作价值 Q(s,a)</td><td>DQN</td></tr>
+          <tr><td><strong>混合路线</strong></td><td>同时学习策略和 Q 函数</td><td>DDPG、TD3、SAC</td></tr>
+        </table>
+
+        <h2>4. 数据怎么用？</h2>
+        <table>
+          <tr><th>类别</th><th>核心特点</th><th>常见算法</th></tr>
+          <tr><td><strong>On-Policy</strong></td><td>用当前策略刚采集的数据更新，训练更稳定，但比较费数据。</td><td>PPO</td></tr>
+          <tr><td><strong>Off-Policy</strong></td><td>旧数据也能反复使用，更省数据，但训练更容易不稳定。</td><td>DQN、DDPG、TD3、SAC</td></tr>
+        </table>
+
+        <h2>5. 一句话区分常见算法</h2>
         <ul>
-          <li>State 和 Observation 在实际机器人任务中怎么区分？</li>
-          <li>Policy 和传统控制里的控制律有哪些相似和不同？</li>
-          <li>V(s)、Q(s,a)、Advantage 在不同算法里分别怎么用？</li>
-          <li>Bellman 方程为什么能支撑价值迭代和 Q-learning？</li>
-          <li>MDP 假设在真实复杂环境中是否总是成立？</li>
+          <li><strong>PPO</strong> 像直接训练控制器。</li>
+          <li><strong>DQN</strong> 像训练动作评分器。</li>
+          <li><strong>SAC / TD3</strong> 像同时训练控制器和评分器。</li>
+          <li><strong>Model-Based RL</strong> 像先学系统模型，再用模型预测和规划。</li>
         </ul>
+
+        <h2>6. 我目前的理解</h2>
+        <p>Part 2 的重点是先建立“算法地图”：看到一个强化学习算法时，先判断它有没有模型、学的是策略还是价值函数、用的是当前数据还是历史数据。这样后续学习 PPO、DQN、DDPG、TD3、SAC 时就不会混在一起。</p>
       </article>
     </main>
   </div>
